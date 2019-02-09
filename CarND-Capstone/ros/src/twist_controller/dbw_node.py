@@ -62,7 +62,7 @@ class DBWNode(object):
 	self.goal_linear_v = 0
 	self.goal_angular_v = 0
 	self.dbw_enabled = False
-	self.stop_a = -1
+	self.brake_control = -1
 
 
         # TODO: Create `Controller` object
@@ -77,28 +77,28 @@ class DBWNode(object):
 	rospy.Subscriber('/current_velocity', TwistStamped, self.velocity_cb)
 	rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
 	rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_cb)
-	rospy.Subscriber('/stop_a', Float32, self.stopa_cb)
+	rospy.Subscriber('/brake_control', Float32, self.brake_cb)
 
         self.loop()
 
 
     def velocity_cb(self, msg):
-	rospy.loginfo("velocity_cb is called")
+	#rospy.loginfo("velocity_cb is called")
 	self.current_linear_v = msg.twist.linear.x
 	self.current_angular_v = msg.twist.angular.z
 
     def twist_cb(self, msg):
-	rospy.loginfo("twist_cb is called")
+	#rospy.loginfo("twist_cb is called")
 	self.goal_linear_v = msg.twist.linear.x
 	self.goal_angular_v = msg.twist.angular.z
 
     def dbw_cb(self, msg):
-	rospy.loginfo("dbw_cb is called")
+	#rospy.loginfo("dbw_cb is called")
 	self.dbw_enabled = msg.data
 
-    def stopa_cb(self, msg):
-	rospy.loginfo("stopa_cb is called")
-	self.stop_a = msg.data
+    def brake_cb(self, msg):
+	rospy.loginfo("brake_cb is called stopa=%f", self.brake_control)
+	self.brake_control = msg.data
  
 
     def loop(self):
@@ -123,7 +123,7 @@ class DBWNode(object):
 		throttle, brake, steer = self.controller.control(self.dbw_enabled,
 							self.goal_linear_v,
 							self.goal_angular_v,
-							self.stop_a,
+							self.brake_control,
 							self.current_linear_v,
 							self.dt)
 		if self.dbw_enabled:

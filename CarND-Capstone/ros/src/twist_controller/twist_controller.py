@@ -2,7 +2,7 @@ from yaw_controller import YawController
 from pid import PID
 from lowpass import LowPassFilter
 
-
+import rospy
 
 
 
@@ -39,18 +39,19 @@ class Controller(object):
 
 
 
-    def control(self, dbw_enabled, goal_linear_v, goal_angular_v, stop_a, current_linear_v, dt):
+    def control(self, dbw_enabled, goal_linear_v, goal_angular_v, brake_control, current_linear_v, dt):
         # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
 	if not dbw_enabled:
 		self.pid_throttle.reset()
 		return 0.,0.,0.
-	if stop_a > self.brake_deadband:
+	if brake_control > self.brake_deadband:
 		current_linear_v = self.lowpass_clv.filt(current_linear_v)
-		stop_a = self.lowpass_a.filt(stop_a)
-		a_add_on = self.accel_add_on(current_linear_v)
-		stop_a -= a_add_on
-		brake = max(0,stop_a)*self.vehicle_mass*self.wheel_radius
+		brake_control = self.lowpass_a.filt(brake_control)
+		brake_add_on = self.brake_accel_add_on(current_linear_v)
+		brake_control -= brake_add_on
+		brake = max(0,brake_control)*self.vehicle_mass*self.wheel_radius
+		rospy.loginfo("twist controller brake = %f", brake)
 		throttle = 0
 	else:
 		brake = 0
@@ -66,6 +67,6 @@ class Controller(object):
 	return throttle, brake, steer
 
 
-    def accel_add_on(self, current_linear_v):
+    def brake_accel_add_on(self, current_linear_v):
 	return 0.0995*current_linear_v +0.055
 	
