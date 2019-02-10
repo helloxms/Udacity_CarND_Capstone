@@ -17,7 +17,10 @@ import cv2
 import yaml
 import math
 
-STATE_COUNT_THRESHOLD = 1
+#sim condition
+#STATE_COUNT_THRESHOLD = 1
+#real condition
+STATE_COUNT_THRESHOLD = 2
 
 class TLDetector(object):
     def __init__(self):
@@ -27,7 +30,7 @@ class TLDetector(object):
         self.waypoints = None
         self.camera_image = None
         self.lights = []
-	self.use_ground_truth = True; #simulator condition
+	self.use_ground_truth = False; #simulator condition or real condition
 	self.distance_to_tl_threshold = 65.0
 	self.pose_wp_idx = None
 	self.waypoints_2d = None
@@ -77,16 +80,17 @@ class TLDetector(object):
     #simulator
     def traffic_cb(self, msg):
         self.lights = msg.lights
-	#rospy.loginfo("traffic callback called")
 	#
 	if self.use_ground_truth:
 		light_wp, state = self.process_traffic_lights()
 		#if state == 0 and light_wp > 0:
-		rospy.loginfo("publish light wp idx=%d, stat=%d", light_wp, state)
+		#rospy.loginfo("publish light wp idx=%d, stat=%d", light_wp, state)
 		if state == 0 and light_wp >0:
 			self.upcoming_red_light_pub.publish(Int32(light_wp))
 		else:
 			self.upcoming_red_light_pub.publish(Int32(-1))
+
+		
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -96,6 +100,8 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+	#rospy.loginfo("image callback called")
+
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -109,7 +115,7 @@ class TLDetector(object):
         if self.state != state:
             self.state_count = 0
             self.state = state
-        elif self.state_count >= STATE_COUNT_THRESHOLD:
+        elif self.state_count >= STATE_COUNT_THRESHOLD :
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
@@ -150,15 +156,15 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-	return light.state
-        #if(not self.has_image):
-        #    self.prev_light_loc = None
-        #    return False
+        if(not self.has_image):
+	    rospy.loginfo("no image info!")
+            self.prev_light_loc = None
+            return False
 
-        #cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
-        # #Get classification
-        #return self.light_classifier.get_classification(cv_image)
+        ##Get classification
+        return self.light_classifier.get_classification(cv_image)
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
