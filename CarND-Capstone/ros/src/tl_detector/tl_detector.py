@@ -169,6 +169,9 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+	if self.use_ground_truth:
+		return light.state
+
         if(not self.has_image):
 	    rospy.loginfo("no image info!")
             self.prev_light_loc = None
