@@ -97,7 +97,7 @@ class DBWNode(object):
 	self.dbw_enabled = msg.data
 
     def brake_cb(self, msg):
-	rospy.loginfo("brake_cb is called stopa=%f", self.brake_control)
+	#rospy.loginfo("brake_cb is called brake =%f", self.brake_control)
 	self.brake_control = msg.data
  
 

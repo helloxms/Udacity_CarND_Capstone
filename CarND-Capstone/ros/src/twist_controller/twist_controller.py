@@ -1,6 +1,6 @@
 from yaw_controller import YawController
 from pid import PID
-from lowpass import LowPassFilter
+from lowpass import LowPassFilter8
 
 import rospy
 
@@ -34,8 +34,8 @@ class Controller(object):
 	ki = 1.0
 	kd = 0.0
 	self.pid_throttle = PID(kp, ki, kd, mn=0, mx =accel_limit)
-	self.lowpass_a = LowPassFilter(1., 1.)
-	self.lowpass_clv = LowPassFilter(1., 1.)
+	self.lowpass_a = LowPassFilter8(1., 1., 1., 1., 1., 1., 1., 1.)
+	self.lowpass_clv = LowPassFilter8(1., 1., 1., 1., 1., 1., 1., 1.)
 
 
 
