@@ -20,7 +20,7 @@ import math
 #sim condition
 #STATE_COUNT_THRESHOLD = 1
 #real condition
-STATE_COUNT_THRESHOLD = 2
+STATE_COUNT_THRESHOLD = 1
 
 class TLDetector(object):
     def __init__(self):
@@ -61,11 +61,12 @@ class TLDetector(object):
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
-        self.last_state = TrafficLight.UNKNOWN
-        self.last_wp = -1
+        self.last_light_state = TrafficLight.UNKNOWN
+        self.last_light_wp = -1
         self.state_count = 0
 	self.has_image = False
-
+	
+	self.check_count = 0
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -81,14 +82,18 @@ class TLDetector(object):
     def traffic_cb(self, msg):
         self.lights = msg.lights
 	#
+	#if self.use_ground_truth:
+	with_light_state = self.use_ground_truth
+	light_wp, state = self.process_traffic_lights(with_light_state)
+	
 	if self.use_ground_truth:
-		light_wp, state = self.process_traffic_lights()
-		#if state == 0 and light_wp > 0:
-		#rospy.loginfo("publish light wp idx=%d, stat=%d", light_wp, state)
 		if state == 0 and light_wp >0:
 			self.upcoming_red_light_pub.publish(Int32(light_wp))
 		else:
 			self.upcoming_red_light_pub.publish(Int32(-1))
+	else:
+		if light_wp > 0:	
+			self.last_light_wp = light_wp
 
 		
 
@@ -100,12 +105,20 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-	#rospy.loginfo("image callback called")
-
+	#rospy.loginfo("image callback called ")
+	
         self.has_image = True
+	with_light_state = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+	
+	if self.check_count < 10:
+		#rospy.loginfo("image callback called end 1")
+		self.check_count += 1
+		return
+	self.check_count = 0
+        light_wp, state = self.process_traffic_lights(with_light_state)
 
+	#rospy.loginfo("image callback called end 2")
         '''
         Publish upcoming red lights at camera frequency.
         Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
@@ -116,12 +129,12 @@ class TLDetector(object):
             self.state_count = 0
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD :
-            self.last_state = self.state
+            self.last_light_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
-            self.last_wp = light_wp
+            self.last_light_wp = light_wp
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
-            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+            self.upcoming_red_light_pub.publish(Int32(self.last_light_wp))
         self.state_count += 1
 
     def dist_to_point(self, pose1,pose2):
@@ -166,7 +179,7 @@ class TLDetector(object):
         ##Get classification
         return self.light_classifier.get_classification(cv_image)
 
-    def process_traffic_lights(self):
+    def process_traffic_lights(self,withLightInfo):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
 
@@ -195,9 +208,13 @@ class TLDetector(object):
 				line_wp_idx = temp_wp_idx
 	
 	if closest_light:
-		state = self.get_light_state(closest_light)
-		rospy.loginfo("tl detecter,process tl state=%d",state)
-		return line_wp_idx, state
+		if withLightInfo:
+			state = self.get_light_state(closest_light)
+			#rospy.loginfo("tl detecter,process tl state=%d",state)
+			self.last_light_state = state
+			return line_wp_idx, state
+		else:
+			return line_wp_idx, self.last_light_state
 
         return -1, TrafficLight.UNKNOWN
 
