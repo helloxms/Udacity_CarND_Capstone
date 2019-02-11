@@ -23,7 +23,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 MAX_DECEL = 0.5
 
   
@@ -98,20 +98,20 @@ class WaypointUpdater(object):
 	closest_idx = self.get_closest_waypoint_idx()
 	farthest_idx = closest_idx + LOOKAHEAD_WPS
 	base_waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
-	rospy.loginfo("closest idx = %d", closest_idx)
-	rospy.loginfo("farthest idx = %d", farthest_idx)
-	rospy.loginfo("stopline idx = %d", self.stopline_wp_idx) 
+	#rospy.loginfo("closest idx = %d", closest_idx)
+	#rospy.loginfo("farthest idx = %d", farthest_idx)
+	#rospy.loginfo("stopline idx = %d", self.stopline_wp_idx) 
 	self.brake_control = -1
 	if self.stopline_wp_idx == -1 :
-		rospy.loginfo("no read light,keep running")
+		#rospy.loginfo("no read light,keep running")
 		lane.waypoints = base_waypoints
 	elif (self.stopline_wp_idx >= farthest_idx-20):
 
-		rospy.loginfo("get read light,but is far away")
+		#rospy.loginfo("get read light,but is far away")
 		lane.waypoints = base_waypoints
 		
 	else:
-		rospy.loginfo("get read light,need stop")
+		#rospy.loginfo("get read light,need stop")
 		lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 		#self.brake_control = 1
 		
@@ -169,7 +169,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
-	rospy.loginfo("waypoints callback called ")
+	#rospy.loginfo("waypoints callback called ")
 	self.base_waypoints = waypoints
 	if not self.waypoints_2d:
 		self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
@@ -177,7 +177,7 @@ class WaypointUpdater(object):
         
 
     def traffic_cb(self, msg):
-	rospy.logwarn("traffic light callback called msg.data=%d", msg.data)
+	#rospy.loginfo("traffic light callback called msg.data=%d", msg.data)
         # TODO: Callback for /traffic_waypoint message. Implement
 	self.stopline_wp_idx = msg.data
      
@@ -194,7 +194,7 @@ class WaypointUpdater(object):
 
     def velocity_cb(self, msg):
 	self.v = msg.twist.linear.x
-	rospy.loginfo("cur velocity v=%f",self.v)
+	#rospy.loginfo("cur velocity v=%f",self.v)
 
 	#there is a sycle in waypoints distance 
     def distance(self, waypoints, wp1, wp2):
