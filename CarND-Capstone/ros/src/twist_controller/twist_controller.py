@@ -30,7 +30,7 @@ class Controller(object):
 	min_speed = 0.0
 	self.yaw_controller = YawController(wheel_base, steer_ratio,
 						min_speed, max_lat_accel,
-						max_steer_angle)
+						max_steer_angle*0.1)
 	kp = 0.3
 	ki = 0.1
 	kd = 0.0
@@ -73,6 +73,7 @@ class Controller(object):
 		steer = self.yaw_controller.get_steering(goal_linear_v,
 							goal_angular_v,
 							current_linear_v)
+		steer = steer*0.5
 	return throttle, brake, steer
 
 
