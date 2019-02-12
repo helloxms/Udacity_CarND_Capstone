@@ -1,6 +1,7 @@
 from yaw_controller import YawController
 from pid import PID
 from lowpass import LowPassFilter8
+from lowpass import LowPassFilter
 
 import rospy
 
@@ -30,12 +31,17 @@ class Controller(object):
 	self.yaw_controller = YawController(wheel_base, steer_ratio,
 						min_speed, max_lat_accel,
 						max_steer_angle)
-	kp = 0.5
-	ki = 1.0
+	kp = 0.3
+	ki = 0.1
 	kd = 0.0
-	self.pid_throttle = PID(kp, ki, kd, mn=0, mx =accel_limit)
+	mn = 0.0
+	mx = 0.2
+	self.pid_throttle = PID(kp, ki, kd, mn, mx)
+	tau = 0.5
+	ts = 0.02
+	self.vel_lpf = LowPassFilter(tau, ts)
 	self.lowpass_a = LowPassFilter8(1., 1., 1., 1., 1., 1., 1., 1.)
-	self.lowpass_clv = LowPassFilter8(1., 1., 1., 1., 1., 1., 1., 1.)
+	#self.lowpass_clv = LowPassFilter8(1., 1., 1., 1., 1., 1., 1., 1.)
 
 
 
@@ -45,11 +51,12 @@ class Controller(object):
 	if not dbw_enabled:
 		self.pid_throttle.reset()
 		return 0.,0.,0.
+	current_linear_v = self.vel_lpf.filt(current_linear_v)
 	if brake_control > self.brake_deadband:
-		current_linear_v = self.lowpass_clv.filt(current_linear_v)
+		#current_linear_v = self.vel_lpf.filt(current_linear_v)
 		brake_control = self.lowpass_a.filt(brake_control)
-		brake_add_on = self.brake_accel_add_on(current_linear_v)
-		brake_control -= brake_add_on
+		#brake_add_on = self.brake_accel_add_on(current_linear_v)
+		#brake_control -= brake_add_on
 		brake = max(0,brake_control)*self.vehicle_mass*self.wheel_radius
 		rospy.loginfo("twist controller brake = %f", brake)
 		throttle = 0
@@ -60,6 +67,8 @@ class Controller(object):
 
 	if goal_linear_v < 0.01 and current_linear_v < 0.01:
 		steer = 0
+		throttle = 0
+		brake = 400
 	else:
 		steer = self.yaw_controller.get_steering(goal_linear_v,
 							goal_angular_v,
