@@ -106,7 +106,7 @@ class TLDetector(object):
 
         """
 	#rospy.loginfo("image callback called ")
-	if self.use_ground_truth:
+	if self.use_ground_truth==True:
 		return	
         self.has_image = True
 	with_light_state = True
@@ -170,7 +170,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-	if self.use_ground_truth:
+	if self.use_ground_truth==True:
 		return light.state
 
         if(not self.has_image):
@@ -212,13 +212,10 @@ class TLDetector(object):
 				line_wp_idx = temp_wp_idx
 	
 	if closest_light:
-		if withLightInfo:
-			state = self.get_light_state(closest_light)
-			#rospy.loginfo("tl detecter,process tl state=%d",state)
-			self.last_light_state = state
-			return line_wp_idx, state
-		else:
-			return line_wp_idx, self.last_light_state
+		state = self.get_light_state(closest_light)
+		#rospy.loginfo("tl detecter,process tl state=%d",state)
+		self.last_light_state = state
+		return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
 
