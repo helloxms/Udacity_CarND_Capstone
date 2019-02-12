@@ -106,7 +106,8 @@ class TLDetector(object):
 
         """
 	#rospy.loginfo("image callback called ")
-	
+	if self.use_ground_truth:
+		return	
         self.has_image = True
 	with_light_state = True
         self.camera_image = msg
