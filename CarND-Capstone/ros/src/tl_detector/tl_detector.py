@@ -174,7 +174,7 @@ class TLDetector(object):
 		return light.state
 
         if(not self.has_image):
-	    rospy.loginfo("no image info!")
+	    #rospy.loginfo("no image info!")
             self.prev_light_loc = None
             return False
 
