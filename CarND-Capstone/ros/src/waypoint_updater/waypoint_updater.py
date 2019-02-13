@@ -23,7 +23,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 MAX_DECEL = 0.5
 
   
@@ -32,7 +32,7 @@ class WaypointUpdater(object):
         rospy.init_node('waypoint_updater')
 	rospy.loginfo('waypoint updater init')
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+        self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
 	rospy.Subscriber('/traffic_waypoint',Int32,self.traffic_cb)
@@ -97,7 +97,19 @@ class WaypointUpdater(object):
 	lane = Lane()
 	closest_idx = self.get_closest_waypoint_idx()
 	farthest_idx = closest_idx + LOOKAHEAD_WPS
+	N = len(self.base_waypoints.waypoints)
+	recycle = False
+	recycle_len = 0
+	if farthest_idx > N-1:
+		farthest_idx = N-1
+		recycle = True
+		recycle_len = closest_idx + LOOKAHEAD_WPS-N
 	base_waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
+	if recycle == True:
+		recycle_points = self.base_waypoints.waypoints[0:recycle_len]
+		for i in recycle_points:
+			base_waypoints.append(i)
+	
 	#rospy.loginfo("closest idx = %d", closest_idx)
 	#rospy.loginfo("farthest idx = %d", farthest_idx)
 	#rospy.loginfo("stopline idx = %d", self.stopline_wp_idx) 
@@ -105,7 +117,7 @@ class WaypointUpdater(object):
 	if self.stopline_wp_idx == -1 :
 		#rospy.loginfo("no read light,keep running")
 		lane.waypoints = base_waypoints
-	elif (self.stopline_wp_idx >= farthest_idx-20):
+	elif (self.stopline_wp_idx >= farthest_idx):
 
 		#rospy.loginfo("get read light,but is far away")
 		lane.waypoints = base_waypoints
@@ -124,7 +136,7 @@ class WaypointUpdater(object):
 
 	temp = []
 	stop_pos = self.base_waypoints.waypoints[self.stopline_wp_idx]
-	stop_distance = self.distance(waypoints, 0, self.stopline_wp_idx - closest_idx)
+	stop_distance = self.distance(closest_idx, self.stopline_wp_idx)
 
 
 	if stop_distance < 6:
@@ -144,7 +156,7 @@ class WaypointUpdater(object):
 		#	self.brake_control = 1
 		vel = 0.
 		if i <= stop_idx and stop_idx < len(waypoints):
-			dist = self.distance(waypoints, i, stop_idx)
+			dist = self.distance(closest_idx+i, closest_idx+stop_idx)
 			vel = math.sqrt(2 * MAX_DECEL * dist)
 		else:
 			vel = 0.
@@ -174,7 +186,7 @@ class WaypointUpdater(object):
 	if not self.waypoints_2d:
 		self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
 		self.waypoint_tree = KDTree(self.waypoints_2d)
-        
+        self.base_waypoints_sub.unregister()
 
     def traffic_cb(self, msg):
 	#rospy.loginfo("traffic light callback called msg.data=%d", msg.data)
@@ -197,18 +209,18 @@ class WaypointUpdater(object):
 	#rospy.loginfo("cur velocity v=%f",self.v)
 
 	#there is a sycle in waypoints distance 
-    def distance(self, waypoints, wp1, wp2):
+    def distance(self, wp1, wp2):
         dist = 0
         dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
-	N = len(waypoints)
+	N = len(self.base_waypoints.waypoints)
 	if wp2 >= wp1:
 		for i in range(wp1,wp2):
-			dist += dl(waypoints[i].pose.pose.position,waypoints[i+1].pose.pose.position)
+			dist += dl(self.base_waypoints.waypoints[i].pose.pose.position,self.base_waypoints.waypoints[i+1].pose.pose.position)
 	else:
 		for i in range(wp1, N-1):
-			dist += dl(waypoints[i].pose.pose.position,waypoints[i+1].pose.pose.position)
+			dist += dl(self.base_waypoints.waypoints[i].pose.pose.position,self.base_waypoints.waypoints[i+1].pose.pose.position)
 		for i in range(wp2):
-			dist += dl(waypoints[i].pose.pose.position,waypoints[i+1].pose.pose.position)
+			dist += dl(self.base_waypoints.waypoints[i].pose.pose.position,self.base_waypoints.waypoints[i+1].pose.pose.position)
 
         return dist
 
