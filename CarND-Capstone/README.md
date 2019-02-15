@@ -72,9 +72,9 @@ cd CarND-Capstone/ros
 roslaunch launch/site.launch
 ```
 5. Confirm that traffic light detection works on real life images
-#WORK FLOW#
+# WORK FLOW
 
-##WHAT WE DO##
+## WHAT WE DO
 1. I selected native installation
    Install ROS Kinetic in Ubuntu 16.04
    Install Dataspeed DBW
@@ -89,11 +89,11 @@ roslaunch launch/site.launch
 4. overview the prject,and write the core code
 5. real world testing
 
-##CORE CODE
+## CORE CODE
 There are some main steps
 
-###1.  Waypoint Updater Node
-####Edit waypoint_updater.py 
+### 1.  Waypoint Updater Node
+#### Edit waypoint_updater.py 
 
 (1) we get waypoints from /base_waypoints ,Msg Type is Lane
 
@@ -106,16 +106,16 @@ There are some main steps
 Now we can see the green waypoints from simulator
 
 
-###2. DBW Node
+### 2. DBW Node
 
-####Edit twist_controller/dbw_node.py 
+#### Edit twist_controller/dbw_node.py 
 
 (1) get dbw_enabled param from /vehicle/dbw_enabled node,Msg Type is Bool.
 init the Controller
 
 (2) if dbw is enabled, call controller.control,and get throttle,brake,steer
 
-####Edit twist_controller/twist_controller.py
+#### Edit twist_controller/twist_controller.py
 
 (1) in control function,we care about these params:
 	
@@ -130,9 +130,9 @@ use pid controller get throttle
 use yaw_controller get steer angle
 use brake controller get the brake
 
-###3. Traffic Light Detection Node
+### 3. Traffic Light Detection Node
 
-####Edit tl_detector/tl_detector.py
+#### Edit tl_detector/tl_detector.py
 (1)there are two condition simulater light and real traffic light. 
 we set a Bool param use_ground_truth to check the condition.
 
@@ -149,7 +149,7 @@ we set a Int32 param last_ligth_wp,it is the traffic light's index position.
 and publish it by /traffic_waypoint node.
 
 
-####4.light_classification
+#### 4.light_classification
 This part is a core function.
 we referenced the link https://github.com/alex-lechner/Traffic-Light-Classification
 
@@ -169,7 +169,7 @@ here we use SSD Inception V2
 3. Testing
 
 
-###5. Full Waypoint Walkthrough
+### 5. Full Waypoint Walkthrough
 
 ####Edit wapoint_updater.py
 
