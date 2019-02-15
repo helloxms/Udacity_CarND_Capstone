@@ -37,6 +37,14 @@ class TLDetector(object):
 	self.waypoints_2d = None
 	self.waypoint_tree = None 
 
+        self.state = TrafficLight.UNKNOWN
+        self.last_light_state = TrafficLight.UNKNOWN
+        self.last_light_wp = -1
+        self.state_count = 0
+	self.has_image = False
+	
+	self.check_count = 0
+
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
@@ -61,13 +69,7 @@ class TLDetector(object):
         self.light_classifier = TLClassifier()
         self.listener = tf.TransformListener()
 
-        self.state = TrafficLight.UNKNOWN
-        self.last_light_state = TrafficLight.UNKNOWN
-        self.last_light_wp = -1
-        self.state_count = 0
-	self.has_image = False
-	
-	self.check_count = 0
+
         rospy.spin()
 
     def pose_cb(self, msg):
