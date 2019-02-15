@@ -23,7 +23,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this number
 MAX_DECEL = 0.5
 
   
@@ -31,6 +31,16 @@ class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
 	rospy.loginfo('waypoint updater init')
+        # TODO: Add other member variables you need below
+        self.pose = None
+        self.base_waypoints = None
+        self.waypoints_2d = None
+        self.waypoint_tree = None
+	self.stopline_wp_idx = -1
+	self.brake_control = -1
+	self.v = 0
+
+
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         self.base_waypoints_sub = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
@@ -45,20 +55,13 @@ class WaypointUpdater(object):
 	#add a param to control braking,pub to dbw_node twist_controller
 	self.brake_control_pub = rospy.Publisher('/brake_control',Float32,queue_size=1)
 
-        # TODO: Add other member variables you need below
-        self.pose = None
-        self.base_waypoints = None
-        self.waypoints_2d = None
-        self.waypoint_tree = None
-	self.stopline_wp_idx = -1
-	self.brake_control = -1
-	self.v = 0
+
         #rospy.spin()
         self.loop()
 
 
     def loop(self):
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(50)
         while not rospy.is_shutdown():
 		
 		if self.pose and self.base_waypoints:
@@ -98,6 +101,7 @@ class WaypointUpdater(object):
 	closest_idx = self.get_closest_waypoint_idx()
 	farthest_idx = closest_idx + LOOKAHEAD_WPS
 	N = len(self.base_waypoints.waypoints)
+	#rospy.logwarn("waypoints len=%d", N)
 	recycle = False
 	recycle_len = 0
 	if farthest_idx > N-1:
@@ -110,20 +114,20 @@ class WaypointUpdater(object):
 		for i in recycle_points:
 			base_waypoints.append(i)
 	
-	#rospy.loginfo("closest idx = %d", closest_idx)
-	#rospy.loginfo("farthest idx = %d", farthest_idx)
-	#rospy.loginfo("stopline idx = %d", self.stopline_wp_idx) 
+	#rospy.logwarn("closest idx = %d", closest_idx)
+	#rospy.logwarn("farthest idx = %d", farthest_idx)
+	#rospy.logwarn("stopline idx = %d", self.stopline_wp_idx) 
 	self.brake_control = -1
 	if self.stopline_wp_idx == -1 :
-		#rospy.loginfo("no read light,keep running")
+		rospy.loginfo("no read light,keep running")
 		lane.waypoints = base_waypoints
 	elif (self.stopline_wp_idx >= farthest_idx):
 
-		#rospy.loginfo("get read light,but is far away")
+		rospy.loginfo("get read light,but is far away")
 		lane.waypoints = base_waypoints
 		
 	else:
-		#rospy.loginfo("get read light,need stop")
+		rospy.loginfo("get read light,need stop")
 		lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 		#self.brake_control = 1
 		
@@ -181,7 +185,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
-	#rospy.loginfo("waypoints callback called ")
+	rospy.logwarn("waypoints callback called ")
 	self.base_waypoints = waypoints
 	if not self.waypoints_2d:
 		self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
