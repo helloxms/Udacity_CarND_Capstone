@@ -231,8 +231,11 @@ is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 	- tl_detector/light_classification/tl_classifier.py
 	TLClassifier's model graph path is set to "models/ssd_udacity/frozen_inference_graph.pb"
 	- install tensorflow's model lib
+	
 	https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
+	
 	git clone https://github.com/tensorflow/models.git
+	
 	git checkout f7e99c0
 	
 	2. twist_controller/twist_controller.py
