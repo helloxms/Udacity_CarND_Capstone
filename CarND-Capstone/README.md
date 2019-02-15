@@ -211,12 +211,14 @@ is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 
 1. In WorkSpace ,Perhaps will meet some ros env error.
 	1. /home/workspace/Udacity_CarND_Capston/CarND-Capstone/ros
-	run command: source devel/setup.sh  (make all ros command available)
-	run command: sudo apt-get install ros-kinetic-dbw-mkz  (install required lib)
-	run command: pip uninstall catkin_pkg  (maybe this bag is too new)
-	run command: pip install catkin_pkg
-	run command: catkin_make
-	run command: roslaunch launch/styx.launch or roslaunch launch/site.launch
+	
+	- run command: source devel/setup.sh  (make all ros command available)
+	- run command: sudo apt-get install ros-kinetic-dbw-mkz  (install required lib)
+	- run command: pip uninstall catkin_pkg  (maybe this bag is too new)
+	- run command: pip install catkin_pkg
+	- run command: catkin_make
+	- run command: roslaunch launch/styx.launch or roslaunch launch/site.launch
+	
 	the last command will start the server.
 2. In the Highway scene, do not check on the camera function
 	1. do not check on the camera function in this scene,it is no use.
@@ -225,11 +227,14 @@ is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 
 3. In the Testlot scene, we will use real traffic light msg.
 	1. tl_detector/tl_detector.py
-	TLDetector's init function will set self.use_ground_truth = True.
-	tl_detector/light_classification/tl_classifier.py
+	- TLDetector's init function will set self.use_ground_truth = True.
+	- tl_detector/light_classification/tl_classifier.py
 	TLClassifier's model graph path is set to "models/ssd_udacity/frozen_inference_graph.pb"
+	- install tensorflow's model lib
+	
 	2. twist_controller/twist_controller.py
 	Controller's control funtion will increase car's steer angle for the camera msg dropped the update rate ?
+	
 	3. waypoint_updater/waypoint_updater.py
 	WaypointUpdater's loop function ,drop down the loop rate.
 	
