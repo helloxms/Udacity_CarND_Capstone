@@ -30,7 +30,8 @@ class TLDetector(object):
         self.waypoints = None
         self.camera_image = None
         self.lights = []
-	self.use_ground_truth = False; #simulator condition or real condition
+	self.use_ground_truth = True 
+         #simulator condition or real condition
 	self.distance_to_tl_threshold = 65.0
 	self.pose_wp_idx = None
 	self.waypoints_2d = None
@@ -83,8 +84,7 @@ class TLDetector(object):
         self.lights = msg.lights
 	#
 	#if self.use_ground_truth:
-	with_light_state = self.use_ground_truth
-	light_wp, state = self.process_traffic_lights(with_light_state)
+	light_wp, state = self.process_traffic_lights()
 	
 	if self.use_ground_truth:
 		if state == 0 and light_wp >0:
@@ -109,7 +109,6 @@ class TLDetector(object):
 	if self.use_ground_truth==True:
 		return	
         self.has_image = True
-	with_light_state = True
         self.camera_image = msg
 	
 	if self.check_count < 10:
@@ -117,7 +116,7 @@ class TLDetector(object):
 		self.check_count += 1
 		return
 	self.check_count = 0
-        light_wp, state = self.process_traffic_lights(with_light_state)
+        light_wp, state = self.process_traffic_lights()
 
 	#rospy.loginfo("image callback called end 2")
         '''
@@ -183,7 +182,7 @@ class TLDetector(object):
         ##Get classification
         return self.light_classifier.get_classification(cv_image)
 
-    def process_traffic_lights(self,withLightInfo):
+    def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
 
