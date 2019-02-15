@@ -113,11 +113,11 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
 	
-	if self.check_count < 10:
+	#if self.check_count :
 		#rospy.loginfo("image callback called end 1")
-		self.check_count += 1
-		return
-	self.check_count = 0
+	#	self.check_count += 1
+	#	return
+	#self.check_count = 0
         light_wp, state = self.process_traffic_lights()
 
 	#rospy.loginfo("image callback called end 2")
