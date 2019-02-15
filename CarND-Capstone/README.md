@@ -149,7 +149,7 @@ we set a Int32 param last_ligth_wp,it is the traffic light's index position.
 and publish it by /traffic_waypoint node.
 
 
-#### 4.light_classification
+### 4.light_classification
 This part is a core function.
 we referenced the link https://github.com/alex-lechner/Traffic-Light-Classification
 
@@ -171,7 +171,7 @@ here we use SSD Inception V2
 
 ### 5. Full Waypoint Walkthrough
 
-####Edit wapoint_updater.py
+#### Edit wapoint_updater.py
 
 (1) combin the closest traffic light's position and state into the logic
 
@@ -179,4 +179,4 @@ here we use SSD Inception V2
 In the generate_lane function, if  stopline_wp_idx > 0 means the read traffic light
 is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 
-##Project RUN
+## Project RUN
