@@ -73,6 +73,23 @@ roslaunch launch/site.launch
 ```
 5. Confirm that traffic light detection works on real life images
 
+# WORK FLOW
+## WHAT WE DO
+	1. I selected native installation
+	   Install ROS Kinetic in Ubuntu 16.04
+	   Install Dataspeed DBW
+	   Install Udacity Simulator
+	2. Clone the project and copy to my github site
+	   Install the python dependencies
+	3. Run the ros server and the simulator
+	   in the directory CarND-Capstone/Ros,
+	   source devel/setup.sh
+	   roslaunch launch/styx.launch
+	   then run the simulator
+	4. overview the prject,and write the core code
+	5. real world testing
+
+
 ## CORE CODE
 There are some main steps
 
@@ -133,7 +150,7 @@ There are some main steps
 	and publish it by /traffic_waypoint node.
 
 
-#### 4.light_classification
+### 4. light_classification
 This part is a core function.
 we referenced the link https://github.com/alex-lechner/Traffic-Light-Classification
 
