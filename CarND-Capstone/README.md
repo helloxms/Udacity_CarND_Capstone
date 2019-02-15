@@ -87,7 +87,7 @@ roslaunch launch/site.launch
    roslaunch launch/styx.launch
    then run the simulator
 4. overview the prject,and write the core code
-5. real world testing
+5. workspace testing
 
 ## CORE CODE
 There are some main steps
@@ -180,3 +180,6 @@ In the generate_lane function, if  stopline_wp_idx > 0 means the read traffic li
 is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 
 ## Project RUN
+
+
+
