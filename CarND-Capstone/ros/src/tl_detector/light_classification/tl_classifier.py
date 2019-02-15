@@ -19,8 +19,8 @@ class TLClassifier(object):
 	#print(os.path.abspath('.'))
 	cur_path = os.getcwd()
 	#print(cur_path)
-	#self.PATH_TO_GRAPH = os.path.join(cur_path, r'light_classification/models/ssd_udacity/frozen_inference_graph.pb')
-	self.PATH_TO_GRAPH = os.path.join(cur_path, r'light_classification/models/ssd_sim/frozen_inference_graph.pb')
+	self.PATH_TO_GRAPH = os.path.join(cur_path, r'light_classification/models/ssd_udacity/frozen_inference_graph.pb')
+	#self.PATH_TO_GRAPH = os.path.join(cur_path, r'light_classification/models/ssd_sim/frozen_inference_graph.pb')
 	self.PATH_TO_LABELS = os.path.join(cur_path,  r'light_classification/data/udacity_label_map.pbtxt')
 	self.NUM_CLASSES = 13
 	self.detection_graph = self.load_graph(self.PATH_TO_GRAPH)
@@ -72,14 +72,15 @@ class TLClassifier(object):
 			iLightStat = self.get_light_stat(scores[0][0], int(classes[0][0]))
 			stringstate = self.get_stat_string(iLightStat)
 			#print( stringstate )
-			#rospy.loginfo("get_classification iLightState=%d ", iLightStat )
-			#rospy.loginfo( stringstate )
-			#cur_path = os.getcwd()
-			#sp = time.time()
-			#strtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(sp))
-			#strtime = strtime + stringstate + r'.jpg'
-			#cv2.imwrite(os.path.join(cur_path,strtime), image)
-
+			rospy.logwarn("get_classification iLightState=%d ", iLightStat )
+			rospy.logwarn( stringstate )
+			'''
+			cur_path = os.getcwd()
+			sp = time.time()
+			strtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(sp))
+			strtime = strtime + stringstate + r'.jpg'
+			cv2.imwrite(os.path.join(cur_path,strtime), image)
+			'''
 			return iLightStat
 
         return TrafficLight.UNKNOWN
@@ -112,8 +113,8 @@ class TLClassifier(object):
 			iLightStat = self.get_light_stat(scores[0][0], int(classes[0][0]))
 			stringstate = self.get_stat_string(iLightStat)
 			print( stringstate )
-			rospy.loginfo("get_classification_test iLightState=%d ", iLightStat )
-			rospy.loginfo( stringstate )
+			rospy.logwarn("tl_classifier get_classification_test iLightState=%d ", iLightStat )
+			rospy.logwarn( stringstate )
 			return iLightStat
 
         return TrafficLight.UNKNOWN
