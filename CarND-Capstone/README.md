@@ -134,10 +134,10 @@ There are some main steps
 ### 3. Traffic Light Detection Node
 
 #### Edit tl_detector/tl_detector.py
-	1. there are two condition simulater light and real traffic light. 
+	1. there are two conditions: simulater light and real traffic light. 
 	we set a Bool param use_ground_truth to check the condition.
 	
-	* In simulater light.
+	* In simulater condition.
 	we get light position and light state from /vehicle/traffic_lights node
 	* In real light condition
 	
@@ -156,9 +156,9 @@ we referenced the link https://github.com/alex-lechner/Traffic-Light-Classificat
 
 	1. Datasets
 	    1. Extract images from a ROSbag file
-	roscore
+	start roscore server
 	rosbag play -l ./just_traffic_light.bag
-	here we create simulator/real two light conditions
+	here we create simulator/real two light conditions's image files
 	    2. Data labeling
 	    3. Create a TFRecord file
 	2. Training
