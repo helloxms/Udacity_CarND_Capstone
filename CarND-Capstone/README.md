@@ -72,22 +72,23 @@ cd CarND-Capstone/ros
 roslaunch launch/site.launch
 ```
 5. Confirm that traffic light detection works on real life images
-# WORK FLOW
 
+# WORK FLOW
 ## WHAT WE DO
-1. I selected native installation
-   Install ROS Kinetic in Ubuntu 16.04
-   Install Dataspeed DBW
-   Install Udacity Simulator
-2. Clone the project and copy to my github site
-   Install the python dependencies
-3. Run the ros server and the simulator
-   in the directory CarND-Capstone/Ros,
-   source devel/setup.sh
-   roslaunch launch/styx.launch
-   then run the simulator
-4. overview the prject,and write the core code
-5. workspace testing
+	1. I selected native installation
+	   Install ROS Kinetic in Ubuntu 16.04
+	   Install Dataspeed DBW
+	   Install Udacity Simulator
+	2. Clone the project and copy to my github site
+	   Install the python dependencies
+	3. Run the ros server and the simulator
+	   in the directory CarND-Capstone/Ros,
+	   source devel/setup.sh
+	   roslaunch launch/styx.launch
+	   then run the simulator
+	4. overview the prject,and write the core code
+	5. real world testing
+
 
 ## CORE CODE
 There are some main steps
@@ -95,91 +96,158 @@ There are some main steps
 ### 1.  Waypoint Updater Node
 #### Edit waypoint_updater.py 
 
-(1) we get waypoints from /base_waypoints ,Msg Type is Lane
-
-(2) get current position from /current_pose,Msg Type is PoseStamped
-
-(3) create a KDTree used to get the closest waypoint from current position
-
-(4) create a loop, publish the final waypoint
-
-Now we can see the green waypoints from simulator
+	1. we get waypoints from /base_waypoints ,Msg Type is Lane
+	
+	2. get current position from /current_pose,Msg Type is PoseStamped
+	
+	3. create a KDTree used to get the closest waypoint from current position
+	
+	4. create a loop, publish the final waypoint
+	
+	Now we can see the green waypoints from simulator
 
 
 ### 2. DBW Node
 
 #### Edit twist_controller/dbw_node.py 
 
-(1) get dbw_enabled param from /vehicle/dbw_enabled node,Msg Type is Bool.
-init the Controller
-
-(2) if dbw is enabled, call controller.control,and get throttle,brake,steer
+	1. get dbw_enabled param from /vehicle/dbw_enabled node,Msg Type is Bool.
+	init the Controller
+	
+	2. if dbw is enabled, call controller.control,and get throttle,brake,steer
 
 #### Edit twist_controller/twist_controller.py
 
-(1) in control function,we care about these params:
+	1.  in control function,we care about these params:
+		
+	* dbw_enabled
+	* goal_linear_v
+	* goal_angular_v
+	* brake_control
+	* current_linear_v
+	* dt
 	
-* dbw_enabled
-* goal_linear_v
-* goal_angular_v
-* brake_control
-* current_linear_v
-* dt
-
-use pid controller get throttle
-use yaw_controller get steer angle
-use brake controller get the brake
+	use pid controller get throttle
+	use yaw_controller get steer angle
+	use brake controller get the brake
 
 ### 3. Traffic Light Detection Node
 
 #### Edit tl_detector/tl_detector.py
-(1)there are two condition simulater light and real traffic light. 
-we set a Bool param use_ground_truth to check the condition.
+	1. there are two conditions: simulater light and real traffic light. 
+	we set a Bool param use_ground_truth to check the condition.
+	
+	* In simulater condition.
+	we get light position and light state from /vehicle/traffic_lights node
+	* In real light condition
+	
+	we get light position from /vehicle/traffic_light node
+	
+	**we get light state from /image_color node ,and called process_traffic_light function.**
+	
+	2. 
+	we set a Int32 param last_ligth_wp,it is the traffic light's index position.
+	and publish it by /traffic_waypoint node.
 
-* In simulater light.
-we get light position and light state from /vehicle/traffic_lights node
-* In real light condition
 
-we get light position from /vehicle/traffic_light node
-
-**we get light state from /image_color node ,and called process_traffic_light function.**
-
-(2)
-we set a Int32 param last_ligth_wp,it is the traffic light's index position.
-and publish it by /traffic_waypoint node.
-
-
-### 4.light_classification
+### 4. light_classification
 This part is a core function.
 we referenced the link https://github.com/alex-lechner/Traffic-Light-Classification
 
-1. Datasets
-    1. Extract images from a ROSbag file
-roscore
-rosbag play -l ./just_traffic_light.bag
-here we create simulator/real two light conditions
-    2. Data labeling
-    3. Create a TFRecord file
-2. Training
-    1. Choosing a model
-here we use SSD Inception V2
-    2. Configure the .config file of the model
-    4. Training the model
-    5. Freezing the graph
-3. Testing
-
+	1. Datasets
+	    1. Extract images from a ROSbag file
+	start roscore server
+	rosbag play -l ./just_traffic_light.bag
+	here we create simulator/real two light conditions's image files
+	    2. Data labeling
+	    3. Create a TFRecord file
+	2. Training
+	    1. Choosing a model
+	here we use SSD Inception V2
+	    2. Configure the .config file of the model
+	    4. Training the model
+	    5. Freezing the graph
+	3. Testing
+- result display
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/RED.jpg "redlight")
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/GREEN.jpg "greenlight")
 
 ### 5. Full Waypoint Walkthrough
 
 #### Edit wapoint_updater.py
 
-(1) combin the closest traffic light's position and state into the logic
+	1. combin the closest traffic light's position and state into the logic
 
-(2) add a int param stopline_wp_idx,get from /traffic_waypoint node 
+	2. add a int param stopline_wp_idx,get from /traffic_waypoint node 
 In the generate_lane function, if  stopline_wp_idx > 0 means the read traffic light
 is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 
 ## Project RUN
+### 1. In the Highway scene
+
+    1. we uncheck the Manual, uncheck the camera,use the simulate traffic light info.
+    2. run the roslaunch launch/styx.launch,start the simulate client
+    3. the car followed the waypoints
+    4. car's speed is limited to 40KPH
+    5. car stoped at the traffic light when it is red sign
+    6. at this scene,uncheck the camera,the throttle,steering,and brake info can be published at 50HZ
+- result display
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/highway_1.jpg "redlight")
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/highway_2.jpg "maxspeed")
+
+### 2. In the Testlot scene
+
+    1. we uncheck the Manual,**run the rosbag**,scene will use the real traffic light info MSG.
+    2. run the roslaunch launch/site.launch,start the simulate client
+    3. the car followed the waypoints
+    4. car's speed is limited to 10KPH
+    5. car stoped at the traffic light when it is red sign
+    6. at this scene, we drop the waypoint_update's loop rate
+- result display
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/testlot_1.jpg "follow")
+![result display](https://github.com/helloxms/Udacity_CarND_Capstone/tree/master/CarND-Capstone/imgs/testlot_2.jpg "redlight")
+
+## Troubleshooting
+
+1. In WorkSpace ,Perhaps will meet some ros env error.
+	1. /home/workspace/Udacity_CarND_Capston/CarND-Capstone/ros
+	
+	- run command: source devel/setup.sh  (make all ros command available)
+	- run command: sudo apt-get install ros-kinetic-dbw-mkz  (install required lib)
+	- run command: pip uninstall catkin_pkg  (maybe this bag is too new)
+	- run command: pip install catkin_pkg
+	- run command: catkin_make
+	- run command: roslaunch launch/styx.launch or roslaunch launch/site.launch
+	
+	the last command will start the server.
+2. In the Highway scene, do not check on the camera function
+	1. do not check on the camera function in this scene,it is no use.
+	2. tl_detector/tl_detector.py
+	TLDetector's init function will set self.use_ground_truth = False.
+
+3. In the Testlot scene, we will use real traffic light msg.
+	1. tl_detector/tl_detector.py
+	- TLDetector's init function will set self.use_ground_truth = True.
+	- tl_detector/light_classification/tl_classifier.py
+	TLClassifier's model graph path is set to "models/ssd_udacity/frozen_inference_graph.pb"
+	- install tensorflow's model lib
+	
+	https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
+	
+	git clone https://github.com/tensorflow/models.git
+	
+	git checkout f7e99c0
+	
+	2. twist_controller/twist_controller.py
+	Controller's control funtion will increase car's steer angle for the camera msg dropped the update rate ?
+	
+	3. waypoint_updater/waypoint_updater.py
+	WaypointUpdater's loop function ,drop down the loop rate.
+	
+	All these modifies will be done by check the launch script param.
+	
+	
+
 
 
 
