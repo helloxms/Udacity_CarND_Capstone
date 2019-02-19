@@ -153,7 +153,7 @@ There are some main steps
 ### 4. light_classification
 This part is a core function.
 we referenced the link https://github.com/alex-lechner/Traffic-Light-Classification
-
+run ros/launch/install_detector_lib.sh to install the tensorflow models.
 	1. Datasets
 	    1. Extract images from a ROSbag file
 	start roscore server
@@ -237,6 +237,8 @@ is in sight. if stopline_wp_idx < 0 mean no read light in sight.
 	git clone https://github.com/tensorflow/models.git
 	
 	git checkout f7e99c0
+	
+	install details are written in ros/launch/install_detector_lib.sh
 	
 	2. twist_controller/twist_controller.py
 	Controller's control funtion will increase car's steer angle for the camera msg dropped the update rate ?
