@@ -25,12 +25,12 @@ STATE_COUNT_THRESHOLD = 1
 class TLDetector(object):
     def __init__(self):
         rospy.init_node('tl_detector')
-
+	self.on_simulator = rospy.get_param('~on_simulator')
         self.pose = None
         self.waypoints = None
         self.camera_image = None
         self.lights = []
-	self.use_ground_truth = False 
+	self.use_ground_truth = self.on_simulator
          #simulator condition or real condition
 	self.distance_to_tl_threshold = 65.0
 	self.pose_wp_idx = None
